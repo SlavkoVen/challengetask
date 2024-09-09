@@ -8,6 +8,8 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GAR_LOCATION: ${{ secrets.GAR_LOCATION }}
+  REPOSITORY: my-docker-repo
+  IMAGE: my-image
   
 jobs:
   build-and-deploy:
@@ -25,12 +27,13 @@ jobs:
 
       - name: Authenticate Docker to Google Cloud Artifact Registry
         run: |
-          gcloud auth configure-docker us-central1-docker.pkg.dev
+          gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev
 
       - name: Build Docker Image
         run: |         
-          docker build -t us-central1-docker.pkg.dev/my-cloud-run-project-435112/my-docker-repo:${{ github.sha }} .
+          docker build -t ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/{{ env.REPOSITORY }}/{{ env.IMAGE }}:${{ github.sha }} .
+      
       - name: Push Docker Image to Artifact Registry
         run: |
-          docker push us-central1-docker.pkg.dev/my-cloud-run-project-435112/my-docker-repo:${{ github.sha }}
+          docker push ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/{{ env.REPOSITORY }}/{{ env.IMAGE }}:${{ github.sha }}
 
