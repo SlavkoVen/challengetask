@@ -26,8 +26,7 @@ jobs:
 
       - name: Authenticate Docker to Google Cloud Artifact Registry
         run: |
-          gcloud auth configure-docker --quiet
-          gcloud auth configure-docker ${GAR_LOCATION}-docker.pkg.dev --quiet
+          gcloud auth configure-docker gcr.io
 
       - name: Build Docker Image
         run: |
@@ -36,3 +35,4 @@ jobs:
       - name: Push Docker Image to GCR
         run: |
           docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:${{ github.sha }}
+
