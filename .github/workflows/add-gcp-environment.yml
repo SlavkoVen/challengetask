@@ -1,0 +1,30 @@
+# .github/workflows/add-gcp-environment.yml
+
+name: Add GCP Project as GitHub Environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment_name: 'TestEnv'
+        description: 'The_name_of_the_new_environment'
+        required: true
+      project_id: 'githubgc'
+        description: 'The GCP project ID'
+        required: true
+
+jobs:
+  create-environment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub Environment
+        run: |
+          gh api \
+            -X POST \
+            -F name=${{ inputs.environment_name }} \
+            -F project_id=${{ inputs.project_id }} \
+            /repos/${{ github.repository }}/environments
+
+      - name: Set up Secrets for GCP Project
+        run: |
+          gh secret set GCP_PROJECT_ID --body "${{ inputs.project_id }}" --repo "${{ github.repository }}"
+          gh secret set GCP_SERVICE_ACCOUNT_KEY --repo "${{ github.repository }}" --body "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}"
