@@ -28,10 +28,9 @@ jobs:
           gcloud auth configure-docker us-docker.pkg.dev
 
       - name: Build Docker Image
-        run: |
-          docker build -t us-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-app:${{ github.sha }} .
-
+        run: |         
+          docker build -t us-central1-docker.pkg.dev/my-cloud-run-project-435112/my-docker-repo:${{ github.sha }} .
       - name: Push Docker Image to Artifact Registry
         run: |
-          docker push us-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-app:${{ github.sha }}
+          docker push us-central1-docker.pkg.dev/my-cloud-run-project-435112/my-docker-repo:${{ github.sha }}
 
