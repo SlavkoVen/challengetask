@@ -1,41 +1,28 @@
-# .github/workflows/add-gcp-environment.yml
-
-name: Build and Push to Artifact Registry
+name: Add GCP Project as GitHub Environment
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
-
-env:
-  PROJECT_ID: my-cloud-run-project-435112
-  REGION: northamerica-northeast1
-  GAR_LOCATION: northamerica-northeast1-docker.pkg.dev/my-cloud-run-project-435112/repository-for-my-project-435112
+  workflow_dispatch:
+    inputs:
+      environment_name:
+        description: 'The name of the new environment'
+        required: true
+      project_id:
+        description: 'The GCP project ID'
+        required: true
 
 jobs:
-  build-and-deploy:
+  create-environment:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
-
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-          export_default_credentials: true
-
-      - name: Authenticate Docker to Google Cloud Artifact Registry
+      - name: Create GitHub Environment
         run: |
-          gcloud auth configure-docker ${GAR_LOCATION}-docker.pkg.dev
+          gh api \
+            -X POST \
+            -F name=${{ inputs.environment_name }} \
+            -F project_id=${{ inputs.project_id }} \
+            /repos/${{ github.repository }}/environments
 
-      - name: Build Docker Image
+      - name: Set up Secrets for GCP Project
         run: |
-          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:${{ github.sha }} .
-
-      - name: Push Docker Image to GCR
-        run: |
-          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-app:${{ github.sha }}
+          gh secret set GCP_PROJECT_ID --body "${{ inputs.project_id }}" --repo "${{ github.repository }}"
+          gh secret set GCP_SERVICE_ACCOUNT_KEY --repo "${{ github.repository }}" --body "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}"
