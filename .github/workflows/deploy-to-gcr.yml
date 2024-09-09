@@ -8,8 +8,8 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GAR_LOCATION: ${{ secrets.GAR_LOCATION }}
-  REPOSITORY: my-docker-repo
-  IMAGE: my-image
+  REPOSITORY: 'my-docker-repo'
+  IMAGE: 'my-image'
   
 jobs:
   build-and-deploy:
