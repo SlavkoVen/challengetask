@@ -7,8 +7,8 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  GAR_LOCATION: 'us-central1'
-  REPOSITORY: 'us-central1-docker.pkg.dev/my-cloud-run-project-435112/my-docker-repo'
+  GAR_LOCATION: us-central1
+  REPOSITORY: us-central1-docker.pkg.dev/my-cloud-run-project-435112/my-docker-repo
 
 jobs:
   build-and-deploy:
