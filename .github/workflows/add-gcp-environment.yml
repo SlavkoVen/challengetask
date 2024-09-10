@@ -24,8 +24,9 @@ jobs:
         run: |
           echo "Creating environment ${{ inputs.environment_name }}..."
           gh api -X POST /repos/SlavkoVen/challengetask/environments \
-            -f environment=${{ inputs.environment_name }} \
-            -f name=${{ inputs.environment_name }}
+            -f environment=test \
+            -f name=test
+
 
 
       - name: Set GCP project secrets
