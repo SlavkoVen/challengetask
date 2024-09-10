@@ -20,13 +20,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Create new environment
+       - name: Create new environment
         run: |
-          gh api -X POST /repos/SlavkoVen/challengetask/environments/${{ inputs.environment_name }} \
+          echo "Creating environment ${{ inputs.environment_name }}..."
+          gh api -X POST /repos/SlavkoVen/challengetask/environments \
             -f environment=${{ inputs.environment_name }}
 
       - name: Set GCP project secrets
         run: |
+          echo "Setting GCP Project ID..."
           gh secret set GCP_PROJECT_ID --body "${{ inputs.project_id }}"
+          echo "Setting GCP Service Account Key..."
           gh secret set GCP_SERVICE_ACCOUNT_KEY --body "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}"
           echo "Environment and secrets for GCP Project ${{ inputs.project_id }} created successfully."
