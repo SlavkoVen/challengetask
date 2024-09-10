@@ -27,6 +27,6 @@ jobs:
 
       - name: Set GCP project secrets
         run: |
-          gh secret set GCP_PROJECT_ID --body "${{ inputs.project_id }}"
+          gh secret set GCP_PROJECT_ID --body "${{ secrets.GCP_PROJECT_ID }}"
           gh secret set GCP_SERVICE_ACCOUNT_KEY --body "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}"
           echo "Environment and secrets for GCP Project ${{ inputs.project_id }} created successfully."
