@@ -22,7 +22,7 @@ jobs:
 
       - name: Create new environment
         run: |
-          gh api -X POST repos/:owner/:repo/environments/${{ inputs.environment_name }} \
+          gh api -X POST /repos/${{ github.repository }}/environments/${{ inputs.environment_name }} \
             -f environment=${{ inputs.environment_name }}
 
       - name: Set GCP project secrets
