@@ -20,7 +20,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-       - name: Create new environment
+      - name: Create new environment
         run: |
           echo "Creating environment ${{ inputs.environment_name }}..."
           gh api -X POST /repos/SlavkoVen/challengetask/environments \
