@@ -23,7 +23,7 @@ jobs:
       - name: Create new environment
         run: |
           echo "Creating environment ${{ inputs.environment_name }}..."
-          gh api -X POST /repos/SlavkoVen/challengetask/environments \
+          gh api https://api.github.com/-X POST /repos/SlavkoVen/challengetask/environments \
             -f environment=${{ inputs.environment_name }}
 
       - name: Set GCP project secrets
