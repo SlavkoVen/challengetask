@@ -13,15 +13,20 @@ on:
 jobs:
   add-environment:
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ secrets.GIT_TOKEN }}
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Create new environment
         run: |
-          gh api -X POST /repos/${{ github.repository }}/environments \
-            -f name="${{ inputs.environment_name }}"
-     
+          echo "Creating environment ${{ inputs.environment_name }}..."
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            -d "{\"name\":\"${{ inputs.environment_name }}\"}" \
+            https://api.github.com/repos/${{ github.repository }}/environments
+
       - name: Set GCP project secrets
         run: |
           echo "Setting GCP Project ID..."
