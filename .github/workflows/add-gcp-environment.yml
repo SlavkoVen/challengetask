@@ -14,28 +14,13 @@ jobs:
   add-environment:
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Додаємо GH_TOKEN як середовище
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Create Environment Example
-          on:
-            push:
-              branches:
-                - main
-          
-          jobs:
-            create-environment:
-              runs-on: ubuntu-latest
-              steps:
-                - name: Create new environment
-                  run: |
-                    echo "Creating environment ${{ inputs.environment_name }}..."
-                    gh api POST /repos/SlavkoVen/challengetask/settings/environments -f name=${{ inputs.environment_name }}
-                  env:
-                    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create new environment
+        run: |
+          echo "Creating environment ${{ inputs.environment_name }}..."
+          gh api POST /repos/SlavkoVen/challengetask/settings/environments -f name=${{ inputs.environment_name }}
 
       - name: Set GCP project secrets
         run: |
