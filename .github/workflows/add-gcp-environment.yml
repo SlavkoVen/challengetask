@@ -14,7 +14,7 @@ jobs:
   add-environment:
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GIT_TOKEN }}
 
     steps:
       - name: Create new environment
