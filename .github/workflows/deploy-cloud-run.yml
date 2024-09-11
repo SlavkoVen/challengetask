@@ -3,11 +3,11 @@ name: Deploy Endpoints to Google Cloud Run
 on:
   push:
     branches:
-      - master
+      - main
 
 env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}  # Your GCP Project ID
-  GAR_LOCATION: 'us-central1'  # GCP Region
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GAR_LOCATION: 'us-central1'
   REPOSITORY: 'my-docker-repo'
   HTTPS_IMAGE: 'https-endpoint'
   FIRESTORE_IMAGE: 'firestore-endpoint'
@@ -34,17 +34,17 @@ jobs:
 
       - name: Build and Push HTTPS Docker Image
         run: |
-          docker build -t ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.HTTPS_IMAGE }}:${{ github.sha }} -f https_trigger/Dockerfile .
+          docker build -t ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.HTTPS_IMAGE }}:${{ github.sha }} -f https_trigger/Dockerfile https_trigger/
           docker push ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.HTTPS_IMAGE }}:${{ github.sha }}
 
       - name: Build and Push Firestore Docker Image
         run: |
-          docker build -t ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.FIRESTORE_IMAGE }}:${{ github.sha }} -f firestore_trigger/Dockerfile .
+          docker build -t ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.FIRESTORE_IMAGE }}:${{ github.sha }} -f firestore_trigger/Dockerfile firestore_trigger/
           docker push ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.FIRESTORE_IMAGE }}:${{ github.sha }}
 
       - name: Build and Push Scheduler Docker Image
         run: |
-          docker build -t ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SCHEDULER_IMAGE }}:${{ github.sha }} -f scheduler_trigger/Dockerfile .
+          docker build -t ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SCHEDULER_IMAGE }}:${{ github.sha }} -f scheduler_trigger/Dockerfile scheduler_trigger/
           docker push ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SCHEDULER_IMAGE }}:${{ github.sha }}
 
       - name: Deploy HTTPS Endpoint to Google Cloud Run
