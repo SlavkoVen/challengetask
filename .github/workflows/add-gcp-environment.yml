@@ -22,45 +22,17 @@ jobs:
 
       - name: Create new environment
         run: |
-          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Accept: application/vnd.github.v3+json" \
-               https://api.github.com/repos/${{ github.repository }}/environments \
-               -d "{\"name\":\"${{ inputs.environment_name }}\"}"
+          echo "Creating environment ${{ inputs.environment_name }}..."
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            -d "{\"name\":\"${{ inputs.environment_name }}\"}" \
+            https://api.github.com/repos/${{ github.repository }}/environments
 
       - name: Set GCP project secrets
         run: |
-          # Get the public key for the repository
-          PUBKEY_RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                            https://api.github.com/repos/${{ github.repository }}/actions/secrets/public-key)
-          PUBLIC_KEY=$(echo "$PUBKEY_RESPONSE" | jq -r '.key')
-          PUBLIC_KEY_ID=$(echo "$PUBKEY_RESPONSE" | jq -r '.key_id')
-
-          # Encrypt GCP_PROJECT_ID and set it as a secret
-          ENCRYPTED_PROJECT_ID=$(python -c "
-          from base64 import b64encode
-          from nacl import encoding, public
-          public_key = public.PublicKey('${PUBLIC_KEY}'.encode('utf-8'), encoding.Base64Encoder())
-          sealed_box = public.SealedBox(public_key)
-          encrypted = sealed_box.encrypt('${{ inputs.project_id }}'.encode('utf-8'))
-          print(b64encode(encrypted).decode('utf-8'))
-          ")
-          curl -X PUT -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Accept: application/vnd.github.v3+json" \
-               https://api.github.com/repos/${{ github.repository }}/actions/secrets/GCP_PROJECT_ID \
-               -d "{\"encrypted_value\":\"${ENCRYPTED_PROJECT_ID}\", \"key_id\":\"${PUBLIC_KEY_ID}\"}"
-
-          # Encrypt GCP_SERVICE_ACCOUNT_KEY and set it as a secret
-          ENCRYPTED_SERVICE_ACCOUNT_KEY=$(python -c "
-          from base64 import b64encode
-          from nacl import encoding, public
-          public_key = public.PublicKey('${PUBLIC_KEY}'.encode('utf-8'), encoding.Base64Encoder())
-          sealed_box = public.SealedBox(public_key)
-          encrypted = sealed_box.encrypt('${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'.encode('utf-8'))
-          print(b64encode(encrypted).decode('utf-8'))
-          ")
-          curl -X PUT -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Accept: application/vnd.github.v3+json" \
-               https://api.github.com/repos/${{ github.repository }}/actions/secrets/GCP_SERVICE_ACCOUNT_KEY \
-               -d "{\"encrypted_value\":\"${ENCRYPTED_SERVICE_ACCOUNT_KEY}\", \"key_id\":\"${PUBLIC_KEY_ID}\"}"
-
+          echo "Setting GCP Project ID..."
+          gh secret set GCP_PROJECT_ID --body "${{ inputs.project_id }}"
+          echo "Setting GCP Service Account Key..."
+          gh secret set GCP_SERVICE_ACCOUNT_KEY --body "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}"
           echo "Environment and secrets for GCP Project ${{ inputs.project_id }} created successfully."
