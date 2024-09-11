@@ -1,0 +1,66 @@
+name: Deploy to Google Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          version: 'latest'
+          service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Authenticate Docker with GCP
+        run: |
+          echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > ${HOME}/gcp-key.json
+          gcloud auth activate-service-account --key-file=${HOME}/gcp-key.json
+          docker login -u _json_key --password-stdin https://gcr.io < ${HOME}/gcp-key.json
+
+      - name: Build and push Docker image for HTTPS endpoint
+        run: |
+          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/https-endpoint ./https_trigger
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/https-endpoint
+
+      - name: Deploy HTTPS endpoint to Cloud Run
+        run: |
+          gcloud run deploy https-endpoint \
+            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/https-endpoint \
+            --region ${{ secrets.GCP_REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --set-env-vars GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Build and push Docker image for Firestore endpoint
+        run: |
+          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/firestore-endpoint ./firestore_trigger
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/firestore-endpoint
+
+      - name: Deploy Firestore endpoint to Cloud Run
+        run: |
+          gcloud run deploy firestore-endpoint \
+            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/firestore-endpoint \
+            --region ${{ secrets.GCP_REGION }} \
+            --platform managed \
+            --set-env-vars GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Build and push Docker image for Scheduler endpoint
+        run: |
+          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/scheduler-endpoint ./scheduler_trigger
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/scheduler-endpoint
+
+      - name: Deploy Scheduler endpoint to Cloud Run
+        run: |
+          gcloud run deploy scheduler-endpoint \
+            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/scheduler-endpoint \
+            --region ${{ secrets.GCP_REGION }} \
+            --platform managed \
+            --set-env-vars GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}
