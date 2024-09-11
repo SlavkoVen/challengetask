@@ -3,7 +3,7 @@ name: Deploy Endpoints to GoogleCloud Run
 on:
   push:
     branches:
-      - main
+      - master
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}   # Ідентифікатор проекту
