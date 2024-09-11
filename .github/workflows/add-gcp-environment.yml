@@ -39,13 +39,13 @@ jobs:
 
           # Encrypt GCP_PROJECT_ID and set it as a secret
           ENCRYPTED_PROJECT_ID=$(python -c "
-from base64 import b64encode
-from nacl import encoding, public
-public_key = public.PublicKey('${PUBLIC_KEY}'.encode('utf-8'), encoding.Base64Encoder())
-sealed_box = public.SealedBox(public_key)
-encrypted = sealed_box.encrypt('${{ inputs.project_id }}'.encode('utf-8'))
-print(b64encode(encrypted).decode('utf-8'))
-")
+          from base64 import b64encode
+          from nacl import encoding, public
+          public_key = public.PublicKey('${PUBLIC_KEY}'.encode('utf-8'), encoding.Base64Encoder())
+          sealed_box = public.SealedBox(public_key)
+          encrypted = sealed_box.encrypt('${{ inputs.project_id }}'.encode('utf-8'))
+          print(b64encode(encrypted).decode('utf-8'))
+          ")
           curl -X PUT -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                -H "Accept: application/vnd.github.v3+json" \
                https://api.github.com/repos/${{ github.repository }}/actions/secrets/GCP_PROJECT_ID \
@@ -53,13 +53,13 @@ print(b64encode(encrypted).decode('utf-8'))
 
           # Encrypt GCP_SERVICE_ACCOUNT_KEY and set it as a secret
           ENCRYPTED_SERVICE_ACCOUNT_KEY=$(python -c "
-from base64 import b64encode
-from nacl import encoding, public
-public_key = public.PublicKey('${PUBLIC_KEY}'.encode('utf-8'), encoding.Base64Encoder())
-sealed_box = public.SealedBox(public_key)
-encrypted = sealed_box.encrypt('${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'.encode('utf-8'))
-print(b64encode(encrypted).decode('utf-8'))
-")
+          from base64 import b64encode
+          from nacl import encoding, public
+          public_key = public.PublicKey('${PUBLIC_KEY}'.encode('utf-8'), encoding.Base64Encoder())
+          sealed_box = public.SealedBox(public_key)
+          encrypted = sealed_box.encrypt('${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'.encode('utf-8'))
+          print(b64encode(encrypted).decode('utf-8'))
+          ")
           curl -X PUT -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                -H "Accept: application/vnd.github.v3+json" \
                https://api.github.com/repos/${{ github.repository }}/actions/secrets/GCP_SERVICE_ACCOUNT_KEY \
