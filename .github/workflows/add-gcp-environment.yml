@@ -9,9 +9,6 @@ on:
       project_id:
         description: 'GCP Project ID'
         required: true
-      gcp_service_account_key:
-        description: 'GCP Service Account Key'
-        required: true
 
 jobs:
   add-environment:
@@ -23,18 +20,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set GCP Project ID secret
+      - name: Set GCP project secrets
         run: |
           echo "Setting GCP Project ID..."
-          gh secret set GCP_PROJECT_ID --env ${{ github.event.inputs.environment_name }} --body "${{ github.event.inputs.project_id }}"
+          gh secret set GCP_PROJECT_ID --env "${{ github.event.inputs.environment_name }}" --body "${{ github.event.inputs.project_id }}"
 
-      - name: Set GCP Service Account Key secret
-        run: |
           echo "Setting GCP Service Account Key..."
-          echo "${{ github.event.inputs.gcp_service_account_key }}" > service_account_key.json
-          gh secret set GCP_SERVICE_ACCOUNT_KEY --env ${{ github.event.inputs.environment_name }} < service_account_key.json
+          printf "%s" "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > service_account_key.json
+          gh secret set GCP_SERVICE_ACCOUNT_KEY --env "${{ github.event.inputs.environment_name }}" < service_account_key.json
           rm service_account_key.json
-
-      - name: Confirm Secrets Set for Environment
-        run: |
-          echo "Secrets set for environment: ${{ github.event.inputs.environment_name }}"
+          echo "Environment and secrets for GCP Project ${{ github.event.inputs.project_id }} created successfully."
