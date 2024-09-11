@@ -20,26 +20,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Create new environment
-        run: |
-          echo "Creating environment ${{ inputs.environment_name }}..."
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-            -H "Accept: application/vnd.github+json" \
-            -d "{\"name\":\"${{ inputs.environment_name }}\"}" \
-            https://api.github.com/repos/${{ github.repository }}/environments
-
       - name: Set GCP project secrets
         run: |
           echo "Setting GCP Project ID..."
           gh secret set GCP_PROJECT_ID --body "${{ inputs.project_id }}"
-
-      - name: Set GCP Service Account Key
-        run: |
+          echo "Setting GCP Service Account Key..."
           echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > service_account_key.json
           gh secret set GCP_SERVICE_ACCOUNT_KEY < service_account_key.json
           rm service_account_key.json
-
-      - name: Confirm successful creation
-        run: |
           echo "Environment and secrets for GCP Project ${{ inputs.project_id }} created successfully."
