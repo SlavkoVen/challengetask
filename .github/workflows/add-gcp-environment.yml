@@ -19,13 +19,13 @@ jobs:
     steps:
       - name: Set GCP Project ID secret
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           gh secret set GCP_PROJECT_ID --env ${{ github.event.inputs.environment_name }} --body "${{ github.event.inputs.gcp_project_id }}"
       
       - name: Set GCP Service Account Key secret
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           gh secret set GCP_SERVICE_ACCOUNT_KEY --env ${{ github.event.inputs.environment_name }} --body "${{ github.event.inputs.gcp_service_account_key }}"
 
