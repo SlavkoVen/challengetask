@@ -1,66 +1,60 @@
-name: Deploy to Google Cloud Run
+name: Deploy Endpoints to Google Cloud Run
 
 on:
   push:
     branches:
       - main
 
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}   # Ідентифікатор проекту
+  GAR_LOCATION: 'us-central1'                 # Регіон
+  REPOSITORY: 'my-docker-repo'
+  HTTPS_IMAGE: 'https-endpoint'
+  FIRESTORE_IMAGE: 'firestore-endpoint'
+  SCHEDULER_IMAGE: 'scheduler-endpoint'
+
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
         with:
-          version: 'latest'
-          service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
           project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}  # В форматі JSON
+          export_default_credentials: true
 
-      - name: Authenticate Docker with GCP
+      - name: Authenticate Docker to Google Cloud Artifact Registry
         run: |
-          echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > ${HOME}/gcp-key.json
-          gcloud auth activate-service-account --key-file=${HOME}/gcp-key.json
-          docker login -u _json_key --password-stdin https://gcr.io < ${HOME}/gcp-key.json
+          gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev
 
-      - name: Build and push Docker image for HTTPS endpoint
+      - name: Build and Push HTTPS Endpoint
         run: |
-          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/https-endpoint ./https_trigger
-          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/https-endpoint
+          docker build -t ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/{{ env.REPOSITORY }}/{{ env.HTTPS_IMAGE }}:${{ github.sha }} -f https_trigger.Dockerfile .
+          docker push ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/{{ env.REPOSITORY }}/{{ env.HTTPS_IMAGE }}:${{ github.sha }}
 
-      - name: Deploy HTTPS endpoint to Cloud Run
+      - name: Build and Push Firestore Endpoint
         run: |
-          gcloud run deploy https-endpoint \
-            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/https-endpoint \
-            --region ${{ secrets.GCP_REGION }} \
-            --platform managed \
-            --allow-unauthenticated \
-            --set-env-vars GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}
+          docker build -t ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/{{ env.REPOSITORY }}/{{ env.FIRESTORE_IMAGE }}:${{ github.sha }} -f firestore_trigger.Dockerfile .
+          docker push ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/{{ env.REPOSITORY }}/{{ env.FIRESTORE_IMAGE }}:${{ github.sha }}
 
-      - name: Build and push Docker image for Firestore endpoint
+      - name: Build and Push Scheduler Endpoint
         run: |
-          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/firestore-endpoint ./firestore_trigger
-          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/firestore-endpoint
+          docker build -t ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/{{ env.REPOSITORY }}/{{ env.SCHEDULER_IMAGE }}:${{ github.sha }} -f scheduler_trigger.Dockerfile .
+          docker push ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/{{ env.REPOSITORY }}/{{ env.SCHEDULER_IMAGE }}:${{ github.sha }}
 
-      - name: Deploy Firestore endpoint to Cloud Run
+      - name: Deploy HTTPS Endpoint to Google Cloud Run
         run: |
-          gcloud run deploy firestore-endpoint \
-            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/firestore-endpoint \
-            --region ${{ secrets.GCP_REGION }} \
-            --platform managed \
-            --set-env-vars GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}
+          gcloud run deploy https-endpoint --image ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/{{ env.REPOSITORY }}/{{ env.HTTPS_IMAGE }}:${{ github.sha }} --region ${{ env.GAR_LOCATION }} --platform managed --allow-unauthenticated
 
-      - name: Build and push Docker image for Scheduler endpoint
+      - name: Deploy Firestore Endpoint to Google Cloud Run
         run: |
-          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/scheduler-endpoint ./scheduler_trigger
-          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/scheduler-endpoint
+          gcloud run deploy firestore-endpoint --image ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/{{ env.REPOSITORY }}/{{ env.FIRESTORE_IMAGE }}:${{ github.sha }} --region ${{ env.GAR_LOCATION }} --platform managed --allow-unauthenticated
 
-      - name: Deploy Scheduler endpoint to Cloud Run
+      - name: Deploy Scheduler Endpoint to Google Cloud Run
         run: |
-          gcloud run deploy scheduler-endpoint \
-            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/scheduler-endpoint \
-            --region ${{ secrets.GCP_REGION }} \
-            --platform managed \
-            --set-env-vars GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}
+          gcloud run deploy scheduler-endpoint --image ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/{{ env.REPOSITORY }}/{{ env.SCHEDULER_IMAGE }}:${{ github.sha }} --region ${{ env.GAR_LOCATION }} --platform managed --allow-unauthenticated
