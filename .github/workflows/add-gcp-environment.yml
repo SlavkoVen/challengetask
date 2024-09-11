@@ -1,43 +1,16 @@
-name: Check GitHub Secrets
+name: Check Environment Secrets
 
 on:
   workflow_dispatch:
-    inputs:
-      environment_name:
-        description: 'Name of the GitHub environment'
-        required: true
 
 jobs:
   check-secrets:
     runs-on: ubuntu-latest
     steps:
-      - name: Check if environment exists
-        id: check_env
+      - name: Check GCP Project ID Secret
         run: |
-          response=$(gh api --method GET /repos/${{ github.repository }}/environments/${{ github.event.inputs.environment_name }} --silent)
-          if [[ $response == *"Not Found"* ]]; then
-            echo "Environment ${{ github.event.inputs.environment_name }} does not exist."
-            exit 1
-          else
-            echo "Environment ${{ github.event.inputs.environment_name }} exists."
-          fi
+          echo "GCP Project ID: ${{ secrets.GCP_PROJECT_ID }}"
 
-      - name: List existing secrets for environment
-        id: list_secrets
+      - name: Check GCP Service Account Key Secret
         run: |
-          echo "Listing existing secrets for environment ${{ github.event.inputs.environment_name }}..."
-          gh secret list --env ${{ github.event.inputs.environment_name }}
-
-      - name: Check required secrets
-        id: check_required_secrets
-        run: |
-          required_secrets=("GCP_PROJECT_ID" "GCP_SERVICE_ACCOUNT_KEY")
-          existing_secrets=$(gh secret list --env ${{ github.event.inputs.environment_name }} | awk '{print $1}')
-
-          for secret in "${required_secrets[@]}"; do
-            if echo "$existing_secrets" | grep -q "$secret"; then
-              echo "Secret $secret is already set."
-            else
-              echo "Secret $secret is missing. Please add it manually."
-            fi
-          done
+          echo "GCP Service Account Key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}"
