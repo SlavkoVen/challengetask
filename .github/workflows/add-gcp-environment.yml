@@ -14,7 +14,7 @@ jobs:
   add-environment:
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.PAT_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -24,7 +24,7 @@ jobs:
         run: |
           echo "Creating environment ${{ inputs.environment_name }}..."
           curl -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
             -d "{\"name\":\"${{ inputs.environment_name }}\"}" \
             https://api.github.com/repos/${{ github.repository }}/environments
