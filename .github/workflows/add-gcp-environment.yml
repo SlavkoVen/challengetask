@@ -1,31 +1,43 @@
-name: Add GCP Environment
+name: Check GitHub Secrets
 
 on:
   workflow_dispatch:
     inputs:
       environment_name:
-        description: 'Name of the new GitHub environment'
-        required: true
-      project_id:
-        description: 'GCP Project ID'
+        description: 'Name of the GitHub environment'
         required: true
 
 jobs:
-  add-environment:
+  check-secrets:
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set GCP project secrets
+      - name: Check if environment exists
+        id: check_env
         run: |
-          echo "Setting GCP Project ID..."
-          gh secret set GCP_PROJECT_ID --body "${{ inputs.project_id }}"
-          echo "Setting GCP Service Account Key..."
-          echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > service_account_key.json
-          gh secret set GCP_SERVICE_ACCOUNT_KEY < service_account_key.json
-          rm service_account_key.json
-          echo "Environment and secrets for GCP Project ${{ inputs.project_id }} created successfully."
+          response=$(gh api --method GET /repos/${{ github.repository }}/environments/${{ github.event.inputs.environment_name }} --silent)
+          if [[ $response == *"Not Found"* ]]; then
+            echo "Environment ${{ github.event.inputs.environment_name }} does not exist."
+            exit 1
+          else
+            echo "Environment ${{ github.event.inputs.environment_name }} exists."
+          fi
+
+      - name: List existing secrets for environment
+        id: list_secrets
+        run: |
+          echo "Listing existing secrets for environment ${{ github.event.inputs.environment_name }}..."
+          gh secret list --env ${{ github.event.inputs.environment_name }}
+
+      - name: Check required secrets
+        id: check_required_secrets
+        run: |
+          required_secrets=("GCP_PROJECT_ID" "GCP_SERVICE_ACCOUNT_KEY")
+          existing_secrets=$(gh secret list --env ${{ github.event.inputs.environment_name }} | awk '{print $1}')
+
+          for secret in "${required_secrets[@]}"; do
+            if echo "$existing_secrets" | grep -q "$secret"; then
+              echo "Secret $secret is already set."
+            else
+              echo "Secret $secret is missing. Please add it manually."
+            fi
+          done
