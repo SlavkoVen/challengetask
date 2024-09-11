@@ -6,46 +6,26 @@ on:
       environment_name:
         description: 'Name of the new GitHub environment'
         required: true
-      gcp_project_id:
+      project_id:
         description: 'GCP Project ID'
-        required: true
-      gcp_service_account_key:
-        description: 'GCP Service Account Key'
         required: true
 
 jobs:
   add-environment:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Create environment
+      - name: Set GCP project secrets
         run: |
-          gh api --method POST /repos/${{ github.repository }}/environments \
-            -F name="${{ github.event.inputs.environment_name }}" \
-            -F description="Environment for GCP Project"
-        env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-
-      - name: Set GCP Project ID secret
-        run: |
-          gh secret set GCP_PROJECT_ID \
-            --env ${{ github.event.inputs.environment_name }} \
-            --body "${{ github.event.inputs.gcp_project_id }}"
-        env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-
-      - name: Set GCP Service Account Key secret
-        run: |
-          echo "${{ github.event.inputs.gcp_service_account_key }}" > service_account_key.json
-          gh secret set GCP_SERVICE_ACCOUNT_KEY \
-            --env ${{ github.event.inputs.environment_name }} \
-            < service_account_key.json
+          echo "Setting GCP Project ID..."
+          gh secret set GCP_PROJECT_ID --body "${{ inputs.project_id }}"
+          echo "Setting GCP Service Account Key..."
+          echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > service_account_key.json
+          gh secret set GCP_SERVICE_ACCOUNT_KEY < service_account_key.json
           rm service_account_key.json
-        env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-
-      - name: Confirm Secrets Set for Environment
-        run: |
-          echo "Secrets set for environment: ${{ github.event.inputs.environment_name }}"
+          echo "Environment and secrets for GCP Project ${{ inputs.project_id }} created successfully."
