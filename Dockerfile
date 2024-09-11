@@ -1,6 +1,14 @@
-# Dockerfile
+# Використовуйте офіційний образ Python
 FROM python:3.9-slim
+
+# Встановіть робочу директорію
 WORKDIR /app
-COPY . /app
-RUN pip install Flask gunicorn
-CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]
+
+# Скопіюйте ваші файли в контейнер
+COPY . .
+
+# Встановіть залежності
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Запустіть ваш скрипт
+CMD ["python", "https_trigger.py"]
