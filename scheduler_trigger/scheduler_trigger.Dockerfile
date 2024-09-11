@@ -1,6 +1,6 @@
 # scheduler_trigger.Dockerfile
 
-# Базовий образ з Python
+# Базовий образ з Pytho
 FROM python:3.9-slim
 
 # Встановлюємо залежності
