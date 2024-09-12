@@ -1,14 +1,14 @@
-# scheduler_trigger.py
-from flask import Flask, request
+from flask import Flask
+import logging
 
 app = Flask(__name__)
 
-@app.route('/', methods=['POST'])
-def scheduler_trigger():
-    scheduler_event = request.json
-    print("Scheduler Trigger activated!")
-    print("Event Details:", scheduler_event)
-    return "Scheduled job received!", 200
+@app.route('/', methods=['GET'])
+def handle_scheduler_request():
+    # Print details of the scheduled job
+    logging.info('Scheduler triggered')
+    
+    return 'Scheduler triggered', 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
