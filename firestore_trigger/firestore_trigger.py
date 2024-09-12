@@ -1,14 +1,10 @@
-# firestore_trigger.py
-from flask import Flask, request
+import functions_framework
 
-app = Flask(__name__)
+@functions_framework.cloud_event
+def firestore_trigger(cloud_event):
+    # Print event details
+    print(f"Event ID: {cloud_event['id']}")
+    print(f"Event Type: {cloud_event['type']}")
+    print(f"Event Data: {cloud_event['data']}")
 
-@app.route('/', methods=['POST'])
-def firestore_trigger():
-    firestore_event = request.json
-    print("Firestore Trigger activated!")
-    print("Event Details:", firestore_event)
-    return "Firestore event received!", 200
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    return 'Event received', 200
