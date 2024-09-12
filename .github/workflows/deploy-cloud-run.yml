@@ -1,4 +1,4 @@
-name: Deploy Endpoints to GC Run
+name: Deploy Endpoints
 
 on:
   push:
