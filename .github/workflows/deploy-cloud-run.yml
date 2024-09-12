@@ -1,4 +1,4 @@
-name: Deploy to Google Cloud Run
+name: Deploy Endpoints to GC Run
 
 on:
   push:
