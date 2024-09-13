@@ -2,7 +2,8 @@
 FROM python:3.9-slim
 
 # Встановлюємо необхідні пакети
-RUN pip install --no-cache-dir functions-framework
+RUN pip install --no-cache-dir Flask
+#RUN pip install --no-cache-dir functions-framework
 
 # Копіюємо файл із функцією
 COPY firestore_trigger.py /app/firestore_trigger.py
