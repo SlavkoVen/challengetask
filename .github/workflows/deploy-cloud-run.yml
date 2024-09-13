@@ -1,4 +1,4 @@
-name: Deploy Endpoints
+name: Deploy Endpoint
 
 on:
   push:
