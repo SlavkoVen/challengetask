@@ -58,7 +58,7 @@ This repository contains the implementation and deployment of three types of end
    - **Function**: Builds and pushes Docker images to Google Container Registry.
    - **Usage**: Automatically triggered on push to the repository.
 
-2. **Add all endpoints that are in the repository in GCP **
+2. **Add all endpoints that are in the repository in GC**
 
  - **File**: `.github/workflows/deploy-cloud-run.yml`
  - **Feature**: adding all endpoints to Google Cloud and deployment in cloud run.
