@@ -2,7 +2,7 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-@app.route("/", methods=["POST"])
+@app.route("/", methods=["GET"])
 def handle_firestore_event():
     firestore_event = request.json
     print("Firestore Event Info:", firestore_event)
