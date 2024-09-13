@@ -14,4 +14,5 @@ WORKDIR /app
 EXPOSE 8080
 
 # Запускаємо сервер functions-framework, вказуючи, яка функція буде використовуватися
-CMD ["functions-framework", "--target=firestore_trigger", "--port=8080"]
+CMD ["python", "firestore_trigger.py"]
+#CMD ["functions-framework", "--target=firestore_trigger", "--port=8080"]
