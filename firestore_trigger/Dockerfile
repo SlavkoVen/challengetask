@@ -1,19 +1,17 @@
-# firestore_trigger.Dockerfile
-
-# Базовий образ з Python
+# Базовий образ Python
 FROM python:3.9-slim
 
-# Встановлюємо залежності
-RUN pip install --no-cache-dir google-cloud-firestore Flask
+# Встановлюємо необхідні пакети
+RUN pip install --no-cache-dir functions-framework
 
-# Копіюємо код програми
+# Копіюємо файл із функцією
 COPY firestore_trigger.py /app/firestore_trigger.py
 
 # Визначаємо робочу директорію
 WORKDIR /app
 
-# Виставляємо порт для Flask (якщо це потрібно для Firestore)
+# Виставляємо порт 8080 для Cloud Run
 EXPOSE 8080
 
-# Запускаємо програму
-CMD ["python", "firestore_trigger.py"]
+# Запускаємо сервер functions-framework, вказуючи, яка функція буде використовуватися
+CMD ["functions-framework", "--target=firestore_trigger", "--port=8080"]
