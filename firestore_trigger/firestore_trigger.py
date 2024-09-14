@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-@app.route('/', methods=['POST'])
+@app.route('/', methods=['GET', 'POST'])
 def firestore_trigger():
     event_data = request.get_json()  # Get the JSON payload sent by Firestore
     if event_data:
