@@ -2,23 +2,15 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['POST'])
 def firestore_trigger():
-    if request.content_type != 'application/json':
-        return jsonify({"error": "Unsupported Media Type. Expected application/json"}), 415
-
-    event_data = request.get_json()  # Get the JSON payload sent by Firestore
+    event_data = request.get_json()  # Отримання JSON-повідомлення від Firestore
     if event_data:
-        # Extract and print event details
-        event_id = event_data.get('id', 'N/A')
-        event_type = event_data.get('type', 'N/A')
-        event_data = event_data.get('data', 'N/A')
+        # Розбір та виведення деталей події
+        print("Firestore Trigger activated!")
+        print("Event Data:", event_data)
         
-        print(f"Event ID: {event_id}")
-        print(f"Event Type: {event_type}")
-        print(f"Event Data: {event_data}")
-
-        return jsonify({"message": "Event received"}), 200
+        return jsonify({"message": "Event received", "event_data": event_data}), 200
     else:
         return 'Invalid event data', 400
 
