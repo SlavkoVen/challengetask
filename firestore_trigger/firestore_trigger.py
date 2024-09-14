@@ -4,6 +4,9 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def firestore_trigger():
+    if request.content_type != 'application/json':
+        return jsonify({"error": "Unsupported Media Type. Expected application/json"}), 415
+
     event_data = request.get_json()  # Get the JSON payload sent by Firestore
     if event_data:
         # Extract and print event details
